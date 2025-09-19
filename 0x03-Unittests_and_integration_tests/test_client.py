@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Unit tests for client.GithubOrgClient"""
-
+"""
+Unit tests for GithubOrgClient
+"""
 import unittest
 from unittest.mock import patch, PropertyMock
-from parameterized import parameterized # type: ignore
 from client import GithubOrgClient
+from parameterized import parameterized # type: ignore
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -53,4 +54,3 @@ class TestGithubOrgClient(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
