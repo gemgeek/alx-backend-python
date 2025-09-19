@@ -8,40 +8,30 @@ from client import GithubOrgClient
 
 
 class TestGithubOrgClient(unittest.TestCase):
-    """Test cases for GithubOrgClient"""
+    """Unit tests for GithubOrgClient"""
 
     @parameterized.expand([
-        ("google",),
-        ("abc",),
+        ("google", {"login": "google"}),
+        ("abc", {"login": "abc"})
     ])
-    @patch("client.get_json")
-    def test_org(self, org_name, mock_get_json):
-        """Test that org returns the correct value and calls get_json once"""
-        # Arrange: fake return value
-        expected_payload = {"login": org_name}
-        mock_get_json.return_value = expected_payload
-
-        # Act: create client and call org
+    @patch('client.get_json')
+    def test_org(self, org_name, expected, mock_get_json):
+        """Test org returns the correct payload"""
+        mock_get_json.return_value = expected
         client = GithubOrgClient(org_name)
-        result = client.org
-
-        # Assert: org property returns expected payload
-        self.assertEqual(result, expected_payload)
+        self.assertEqual(client.org, expected)
         mock_get_json.assert_called_once_with(
             f"https://api.github.com/orgs/{org_name}"
         )
 
     def test_public_repos_url(self):
-        """Test that _public_repos_url returns expected URL from mocked org"""
-        test_payload = {"repos_url": "https://api.github.com/orgs/google/repos"}
-
-        with patch("client.GithubOrgClient.org", new_callable=PropertyMock) as mock_org:
-            mock_org.return_value = test_payload
-            client = GithubOrgClient("google")
-            result = client._public_repos_url
-
-            self.assertEqual(result, test_payload["repos_url"])  
-
+        """Test _public_repos_url returns correct value"""
+        with patch.object(
+            GithubOrgClient, 'org', new_callable=PropertyMock
+        ) as mock_org:
+            mock_org.return_value = {"repos_url": "https://fake.url"}
+            client = GithubOrgClient("test")
+            self.assertEqual(client._public_repos_url, "https://fake.url")
 
     @patch('client.get_json')
     def test_public_repos(self, mock_get_json):
