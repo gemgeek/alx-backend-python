@@ -79,13 +79,19 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher = patch('requests.get')
         mock_get = cls.get_patcher.start()
 
-        # Configure side_effect so .json() returns correct payload
+        # Configure side_effect to return fixtures
         def side_effect(url):
-            if url.endswith("/orgs/google"):
+            class MockResponse:
+                def __init__(self, json_data):
+                    self._json_data = json_data
+
+                def json(self):
+                    return self._json_data
+
+            if url == "https://api.github.com/orgs/google":
                 return MockResponse(cls.org_payload)
-            if url.endswith("/orgs/google/repos"):
+            elif url == cls.org_payload["repos_url"]:
                 return MockResponse(cls.repos_payload)
-            return MockResponse(None)
 
         mock_get.side_effect = side_effect
 
@@ -94,14 +100,18 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         """Stop patcher"""
         cls.get_patcher.stop()
 
+    def test_public_repos(self):
+        """Test that public_repos returns expected repos"""
+        client = GithubOrgClient("google")
+        self.assertEqual(client.public_repos(), self.expected_repos)
 
-class MockResponse:
-    """Helper mock response object with .json() method"""
-    def __init__(self, payload):
-        self._payload = payload
-
-    def json(self):
-        return self._payload
+    def test_public_repos_with_license(self):
+        """Test that public_repos filters by license"""
+        client = GithubOrgClient("google")
+        self.assertEqual(
+            client.public_repos(license="apache-2.0"),
+            self.apache2_repos
+        )
 
 
 if __name__ == '__main__':
