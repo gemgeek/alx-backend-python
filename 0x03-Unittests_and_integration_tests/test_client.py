@@ -50,9 +50,7 @@ class TestGithubOrgClient(unittest.TestCase):
         mock_get_json.return_value = payload
 
         with patch.object(
-            GithubOrgClient,
-            "_public_repos_url",
-            new_callable=PropertyMock
+            GithubOrgClient, "_public_repos_url", new_callable=PropertyMock
         ) as mock_url:
             mock_url.return_value = "https://fake.url"
             client = GithubOrgClient("google")
@@ -65,4 +63,4 @@ class TestGithubOrgClient(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-              
+
