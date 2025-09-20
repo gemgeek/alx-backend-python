@@ -11,7 +11,14 @@ from fixtures import TEST_PAYLOAD
 # Unpack the fixtures
 org_payload, repos_payload, expected_repos, apache2_repos = TEST_PAYLOAD[0]
 
-
+@parameterized_class([
+    {
+        "org_payload": org_payload,
+        "repos_payload": repos_payload,
+        "expected_repos": expected_repos,
+        "apache2_repos": apache2_repos,
+    }
+])
 class TestGithubOrgClient(unittest.TestCase):
     """Unit tests for GithubOrgClient"""
 
@@ -65,7 +72,7 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(result, expected)
 
 
-@parameterized_class(TEST_PAYLOAD)([
+@parameterized_class([
     {
         "org_payload": org_payload,
         "repos_payload": repos_payload,
