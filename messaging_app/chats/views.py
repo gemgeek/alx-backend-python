@@ -28,13 +28,22 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
-
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['conversation'] # Allows filtering messages by conversation ID
+    filterset_fields = ['conversation']
 
     def get_queryset(self):
-        user_conversations = self.request.user.conversations.all()
-        return Message.objects.filter(conversation__in=user_conversations)
+        """
+        This view should return a list of all messages for the
+        conversation as determined by the nested URL.
+        """
+        # We get the conversation's primary key from the URL kwargs
+        conversation_pk = self.kwargs['conversation_pk']
+        return Message.objects.filter(conversation_id=conversation_pk)
 
     def perform_create(self, serializer):
-        serializer.save(sender=self.request.user)
+        # We also need to get the conversation from the URL to save the new message
+        conversation_pk = self.kwargs['conversation_pk']
+        serializer.save(
+            sender=self.request.user,
+            conversation_id=conversation_pk
+        )
