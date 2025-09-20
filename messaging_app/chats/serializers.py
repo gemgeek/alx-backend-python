@@ -30,7 +30,6 @@ class ConversationSerializer(serializers.ModelSerializer):
     """
     participants = UserSerializer(many=True, read_only=True)
     messages = MessageSerializer(many=True, read_only=True)
-
     message_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -38,7 +37,6 @@ class ConversationSerializer(serializers.ModelSerializer):
         fields = ['conversation_id', 'participants', 'created_at', 'messages', 'message_count']
 
     def get_message_count(self, obj):
-        # obj is the Conversation instance. We count its related messages.
         return obj.messages.count()
 
     def validate(self, data):
@@ -47,5 +45,6 @@ class ConversationSerializer(serializers.ModelSerializer):
         """
         participants = self.context['request'].data.get('participants')
         if not participants or len(participants) < 2:
-            raise ValidationError("A conversation must have at least two participants.")
+            # THIS IS THE ONLY LINE THAT CHANGES
+            raise serializers.ValidationError("A conversation must have at least two participants.")
         return data
