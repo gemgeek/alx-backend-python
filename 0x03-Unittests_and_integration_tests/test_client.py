@@ -66,8 +66,8 @@ class TestGithubOrgClient(unittest.TestCase):
 
 
 @parameterized_class(
-    ('org_payload', 'repos_payload', 'expected_repos', 'apache2_repos'),
-    [(org_payload, repos_payload, expected_repos, apache2_repos)]
+    ("org_payload", "repos_payload", "expected_repos", "apache2_repos"),
+    TEST_PAYLOAD
 )
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Integration tests for GithubOrgClient.public_repos"""
@@ -75,15 +75,12 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up class fixtures and patch requests.get."""
-        # A dictionary to map URLs to their expected payloads
         route_payload = {
-            "https://api.github.com/orgs/google": cls.org_payload,
             cls.org_payload["repos_url"]: cls.repos_payload,
+            "https://api.github.com/orgs/google": cls.org_payload,
         }
 
-        # Our side effect function for the mock
         def get_payload(url):
-            # Create a mock object that has a .json() method
             mock_response = unittest.mock.Mock()
             mock_response.json.return_value = route_payload.get(url)
             return mock_response
