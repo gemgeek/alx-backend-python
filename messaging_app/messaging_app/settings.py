@@ -132,3 +132,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ]
 }
+
+# Tell Django to use our custom User model
+AUTH_USER_MODEL = 'chats.User'
