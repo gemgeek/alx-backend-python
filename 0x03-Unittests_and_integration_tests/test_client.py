@@ -5,20 +5,13 @@ Unit and Integration tests for GithubOrgClient
 import unittest
 from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
-from parameterized import parameterized, parameterized_class
+from parameterized import parameterized, parameterized_class  #type: ignore
 from fixtures import TEST_PAYLOAD
 
 # Unpack the fixtures
 org_payload, repos_payload, expected_repos, apache2_repos = TEST_PAYLOAD[0]
 
-@parameterized_class([
-    {
-        "org_payload": org_payload,
-        "repos_payload": repos_payload,
-        "expected_repos": expected_repos,
-        "apache2_repos": apache2_repos,
-    }
-])
+
 class TestGithubOrgClient(unittest.TestCase):
     """Unit tests for GithubOrgClient"""
 
@@ -72,24 +65,17 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(result, expected)
 
 
-@parameterized_class([
-    {
-        "org_payload": org_payload,
-        "repos_payload": repos_payload,
-        "expected_repos": expected_repos,
-        "apache2_repos": apache2_repos,
-    }
-])
+@parameterized_class(
+    ('org_payload', 'repos_payload', 'expected_repos', 'apache2_repos'),
+    [(org_payload, repos_payload, expected_repos, apache2_repos)]
+)
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Integration tests for GithubOrgClient.public_repos"""
 
     @classmethod
     def setUpClass(cls):
         """Start patcher for requests.get"""
-        cls.get_patcher = patch('requests.get')
-        mock_get = cls.get_patcher.start()
-
-        # Configure side_effect to return fixtures
+        # Define the side effect function for the mock
         def side_effect(url):
             class MockResponse:
                 def __init__(self, json_data):
@@ -98,11 +84,16 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
                 def json(self):
                     return self._json_data
 
+            # Use cls.org_payload which is set by the decorator
             if url == "https://api.github.com/orgs/google":
                 return MockResponse(cls.org_payload)
             elif url == cls.org_payload["repos_url"]:
                 return MockResponse(cls.repos_payload)
+            # Return a default response or raise an error for unexpected URLs
+            return None
 
+        cls.get_patcher = patch('requests.get')
+        mock_get = cls.get_patcher.start()
         mock_get.side_effect = side_effect
 
     @classmethod
