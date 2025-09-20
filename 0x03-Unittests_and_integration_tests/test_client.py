@@ -5,8 +5,7 @@ Unit and Integration tests for GithubOrgClient
 import unittest
 from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
-from parameterized import parameterized_class  # type: ignore
-from parameterized import parameterized  # type: ignore
+from parameterized import parameterized, parameterized_class
 from fixtures import TEST_PAYLOAD
 
 # Unpack the fixtures
@@ -66,7 +65,7 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(result, expected)
 
 
-@parameterized_class(TEST_PAYLOAD)([
+@parameterized_class([
     {
         "org_payload": org_payload,
         "repos_payload": repos_payload,
