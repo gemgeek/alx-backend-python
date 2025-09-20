@@ -948,3 +948,5 @@ TEST_PAYLOAD = [
     ['dagger', 'kratu', 'traceur-compiler', 'firmata.py'],
   )
 ]
+
+org_payload, repos_payload, expected_repos, apache2_repos = TEST_PAYLOAD[0]
