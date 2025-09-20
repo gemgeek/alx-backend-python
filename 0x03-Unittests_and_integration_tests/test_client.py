@@ -7,7 +7,10 @@ from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
 from parameterized import parameterized_class  # type: ignore
 from parameterized import parameterized  # type: ignore
-import fixtures
+from fixtures import TEST_PAYLOAD
+
+# Unpack the fixtures
+org_payload, repos_payload, expected_repos, apache2_repos = TEST_PAYLOAD[0]
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -65,10 +68,10 @@ class TestGithubOrgClient(unittest.TestCase):
 
 @parameterized_class([
     {
-        "org_payload": fixtures.org_payload,
-        "repos_payload": fixtures.repos_payload,
-        "expected_repos": fixtures.expected_repos,
-        "apache2_repos": fixtures.apache2_repos,
+        "org_payload": org_payload,
+        "repos_payload": repos_payload,
+        "expected_repos": expected_repos,
+        "apache2_repos": apache2_repos,
     }
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
