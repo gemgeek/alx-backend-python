@@ -5,7 +5,7 @@ Unit and Integration tests for GithubOrgClient
 import unittest
 from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
-from parameterized import parameterized, parameterized_class
+from parameterized import parameterized, parameterized_class  # type: ignore
 from fixtures import TEST_PAYLOAD
 
 # Unpack the fixtures
