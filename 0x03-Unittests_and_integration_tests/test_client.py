@@ -74,40 +74,36 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Start patcher for requests.get"""
-        # Define the side effect function for the mock
-        def side_effect(url):
-            class MockResponse:
-                def __init__(self, json_data):
-                    self._json_data = json_data
+        """Set up class fixtures and patch requests.get."""
+        # A dictionary to map URLs to their expected payloads
+        route_payload = {
+            "https://api.github.com/orgs/google": cls.org_payload,
+            cls.org_payload["repos_url"]: cls.repos_payload,
+        }
 
-                def json(self):
-                    return self._json_data
-
-            # Use cls.org_payload which is set by the decorator
-            if url == "https://api.github.com/orgs/google":
-                return MockResponse(cls.org_payload)
-            elif url == cls.org_payload["repos_url"]:
-                return MockResponse(cls.repos_payload)
-            # Return a default response or raise an error for unexpected URLs
-            return None
+        # Our side effect function for the mock
+        def get_payload(url):
+            # Create a mock object that has a .json() method
+            mock_response = unittest.mock.Mock()
+            mock_response.json.return_value = route_payload.get(url)
+            return mock_response
 
         cls.get_patcher = patch('requests.get')
         mock_get = cls.get_patcher.start()
-        mock_get.side_effect = side_effect
+        mock_get.side_effect = get_payload
 
     @classmethod
     def tearDownClass(cls):
-        """Stop patcher"""
+        """Tear down class fixtures."""
         cls.get_patcher.stop()
 
     def test_public_repos(self):
-        """Test that public_repos returns expected repos"""
+        """Test that public_repos returns the expected list of repos."""
         client = GithubOrgClient("google")
         self.assertEqual(client.public_repos(), self.expected_repos)
 
     def test_public_repos_with_license(self):
-        """Test that public_repos filters by license"""
+        """Test public_repos with a license filter."""
         client = GithubOrgClient("google")
         self.assertEqual(
             client.public_repos(license="apache-2.0"),
