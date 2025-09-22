@@ -71,4 +71,23 @@ class OffensiveLanguageMiddleware:
 
         # Allow the request to continue
         response = self.get_response(request)
-        return response      
+        return response 
+
+class RolePermissionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = request.user
+
+        # First, check if the user is even logged in.
+        # If not, let other parts of the app (like DRF permissions) handle it.
+        if user.is_authenticated:
+            # Check if the user's role is NOT one of the allowed roles.
+            # Based on your User model, we'll allow ADMIN and HOST.
+            if user.role not in ['ADMIN', 'HOST']:
+                return HttpResponseForbidden("You do not have the required role to access this page.")
+
+        # If the user is anonymous or has the correct role, let the request continue.
+        response = self.get_response(request)
+        return response         
