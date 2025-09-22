@@ -1,8 +1,8 @@
-from rest_framework import viewsets, permissions,  # type: ignore
+from rest_framework import viewsets, permissions, status  # type: ignore
 from rest_framework.status import HTTP_403_FORBIDDEN
 from rest_framework.response import Response  # type: ignore
 from django_filters.rest_framework import DjangoFilterBackend  # type: ignore
-from .models import Conversation, Message
+from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsOwner
@@ -34,30 +34,37 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and sending messages within a specific conversation.
+    """
     serializer_class = MessageSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['conversation']
-
+    permission_classes = [IsParticipantOfConversation] 
     pagination_class = MessagePagination
     filterset_class = MessageFilter
+    filter_backends = [DjangoFilterBackend] 
 
     def get_queryset(self):
         """
-        This view should return a list of all messages for the
-        conversation as determined by the nested URL.
+        This view should return a list of all messages for the conversation
+        as determined by the URL, but only if the user is a participant.
         """
-        # We get the conversation's primary key from the URL kwargs
         conversation_pk = self.kwargs['conversation_pk']
-        return Message.objects.filter(conversation_id=conversation_pk)
+        # Ensure the user is part of the conversation before showing messages
+        return Message.objects.filter(
+            conversation__conversation_id=conversation_pk,
+            conversation__participants=self.request.user
+        )
 
     def perform_create(self, serializer):
-        # We also need to get the conversation from the URL to save the new message
-        conversation_pk = self.kwargs['conversation_pk']
-        serializer.save(
-            sender=self.request.user,
-            conversation_id=conversation_pk
-        )
+        """
+        Assigns the sender (logged-in user) and conversation (from URL)
+        automatically when creating a new message.
+        """
+        # 1. Get the conversation object from the database using the ID from the URL
+        conversation = Conversation.objects.get(conversation_id=self.kwargs['conversation_pk'])
+        
+        # 2. Save the message, passing the full objects for sender and conversation
+        serializer.save(sender=self.request.user, conversation=conversation)
 
 class MessageDetailView(RetrieveAPIView):
     queryset = Message.objects.all()

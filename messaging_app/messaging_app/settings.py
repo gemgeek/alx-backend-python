@@ -144,7 +144,8 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
 }
 
+AUTH_USER_MODEL = 'chats.User' 
 
-
-# Tell Django to use our custom User model
-AUTH_USER_MODEL = 'chats.User'
+SIMPLE_JWT = {
+    "USER_ID_FIELD": "user_id",
+}

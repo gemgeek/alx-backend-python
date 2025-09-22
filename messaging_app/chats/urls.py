@@ -1,5 +1,5 @@
 from django.urls import path, include  # type: ignore
-from rest_framework import routers  # type: ignore
+from rest_framework_nested import routers  # type: ignore
 from .views import ConversationViewSet, MessageViewSet
 
 # The parent router for conversations
