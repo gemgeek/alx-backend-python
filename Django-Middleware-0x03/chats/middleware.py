@@ -1,3 +1,4 @@
+import time
 from django.http import HttpResponseForbidden
 from datetime import datetime
 
@@ -40,4 +41,34 @@ class RestrictAccessByTimeMiddleware:
 
         # If within the allowed time, proceed as normal
         response = self.get_response(request)
-        return response    
+        return response  
+
+class OffensiveLanguageMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # This dictionary will store IP addresses and their request timestamps
+        self.requests = {}
+
+    def __call__(self, request):
+        # We only want to rate-limit POST requests for sending messages
+        if request.method == 'POST' and request.path.endswith('/messages/'):
+            ip_address = request.META.get("REMOTE_ADDR")
+            current_time = time.time()
+
+            # Get the list of timestamps for this IP, or an empty list if it's new
+            request_times = self.requests.get(ip_address, [])
+
+            # Keep only the timestamps from the last 60 seconds
+            valid_times = [t for t in request_times if current_time - t < 60]
+
+            # If the user has made 5 or more requests in the last minute, block them
+            if len(valid_times) >= 5:
+                return HttpResponseForbidden("Rate limit exceeded. Please try again in a minute.")
+
+            # Add the current timestamp and update the dictionary
+            valid_times.append(current_time)
+            self.requests[ip_address] = valid_times
+
+        # Allow the request to continue
+        response = self.get_response(request)
+        return response      
