@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from .permissions import IsOwner
 from rest_framework.generics import RetrieveAPIView
 from .permissions import IsParticipantOfConversation
+from .pagination import MessagePagination  
+from .filters import MessageFilter
 
 class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
@@ -36,6 +38,9 @@ class MessageViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['conversation']
+
+    pagination_class = MessagePagination
+    filterset_class = MessageFilter
 
     def get_queryset(self):
         """
