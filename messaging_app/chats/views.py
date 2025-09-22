@@ -6,10 +6,12 @@ from .serializers import ConversationSerializer, MessageSerializer
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsOwner
 from rest_framework.generics import RetrieveAPIView
+from .permissions import IsParticipantOfConversation
 
 class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
     permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsParticipantOfConversation]
 
     def get_queryset(self):
         return self.request.user.conversations.all()
