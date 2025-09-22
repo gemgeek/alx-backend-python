@@ -9,9 +9,10 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+from pathlib import Path
 import os
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -54,7 +55,7 @@ MIDDLEWARE = [
     'chats.middleware.OffensiveLanguageMiddleware',
 ]
 
-ROOT_URLCONF = 'messaging_app.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
@@ -71,7 +72,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'messaging_app.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 
 # Database
