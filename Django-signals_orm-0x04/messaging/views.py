@@ -43,8 +43,6 @@ class UnreadMessagesView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        # Use our new custom manager!
-        # We also use .only() to fetch just the fields we need, which is more efficient.
-        return Message.unread.for_user(user).only(
+        return Message.unread.unread_for_user(user).only(
             'id', 'sender', 'content', 'timestamp'
         )    

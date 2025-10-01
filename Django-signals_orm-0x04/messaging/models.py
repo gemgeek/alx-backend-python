@@ -1,17 +1,8 @@
 from django.db import models
 from django.conf import settings
+from .managers import UnreadMessagesManager
 
 User = settings.AUTH_USER_MODEL
-
-class UnreadMessagesManager(models.Manager):
-    def for_user(self, user):
-        """
-        Returns a queryset of unread messages for a given user.
-        """
-        return self.get_queryset().filter(
-            receiver=user, 
-            is_read=False
-        )
 
 class Message(models.Model):
     sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
@@ -28,8 +19,8 @@ class Message(models.Model):
         on_delete=models.CASCADE
     )
     # Attach the managers
-    objects = models.Manager() # The default manager
-    unread = UnreadMessagesManager() # Our custom manager
+    objects = models.Manager() 
+    unread = UnreadMessagesManager() 
 
     def __str__(self):
         return f"From {self.sender} to {self.receiver}"
