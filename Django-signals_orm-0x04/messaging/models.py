@@ -3,11 +3,22 @@ from django.conf import settings
 
 User = settings.AUTH_USER_MODEL
 
+class UnreadMessagesManager(models.Manager):
+    def for_user(self, user):
+        """
+        Returns a queryset of unread messages for a given user.
+        """
+        return self.get_queryset().filter(
+            receiver=user, 
+            is_read=False
+        )
+
 class Message(models.Model):
     sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
     content = models.TextField()
     is_edited = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
     parent_message = models.ForeignKey(
         'self', 
@@ -16,6 +27,9 @@ class Message(models.Model):
         related_name='replies', 
         on_delete=models.CASCADE
     )
+    # Attach the managers
+    objects = models.Manager() # The default manager
+    unread = UnreadMessagesManager() # Our custom manager
 
     def __str__(self):
         return f"From {self.sender} to {self.receiver}"

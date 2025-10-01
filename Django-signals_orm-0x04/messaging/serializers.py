@@ -19,3 +19,9 @@ class ThreadedMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['id', 'sender', 'content', 'timestamp', 'is_edited', 'replies']
+
+
+class UnreadMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['id', 'sender', 'content', 'timestamp']        

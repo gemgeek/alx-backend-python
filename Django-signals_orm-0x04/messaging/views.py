@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import render
+from .serializers import ThreadedMessageSerializer, UnreadMessageSerializer
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -34,3 +35,16 @@ class ThreadedMessagesView(ListAPIView):
         ).order_by('timestamp')
 
         return queryset
+    
+class UnreadMessagesView(ListAPIView):
+    serializer_class = UnreadMessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # Use our new custom manager!
+        # We also use .only() to fetch just the fields we need, which is more efficient.
+        return Message.unread.for_user(user).only(
+            'id', 'sender', 'content', 'timestamp'
+        )    
