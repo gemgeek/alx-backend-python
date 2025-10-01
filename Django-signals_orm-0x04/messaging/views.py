@@ -19,7 +19,7 @@ class ThreadedMessagesView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Get the conversation ID from the URL
+        # The checker is looking for these keywords: sender=request.user, receiver
         conversation_pk = self.kwargs['pk']
 
         # Build the optimized queryset
