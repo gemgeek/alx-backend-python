@@ -1,3 +1,6 @@
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+
 from .models import Message
 from .serializers import ThreadedMessageSerializer
 from rest_framework.generics import ListAPIView
@@ -15,6 +18,7 @@ def delete_user(request):
     user.delete()
     return Response({"result": "User deleted"}, status=status.HTTP_204_NO_CONTENT)
 
+@method_decorator(cache_page(60), name='dispatch')
 class ThreadedMessagesView(ListAPIView):
     serializer_class = ThreadedMessageSerializer
     permission_classes = [IsAuthenticated]
