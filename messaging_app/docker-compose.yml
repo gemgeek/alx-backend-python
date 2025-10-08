@@ -1,0 +1,29 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+    env_file:
+      - ./.env
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DB}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+
+  web:
+    build: .
+    container_name: django_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+
+volumes:
+  mysql_data:
