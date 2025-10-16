@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# A script to perform and monitor a zero-downtime rolling update.
+
+echo "--- Starting continuous test for downtime ---"
+
+while true; do
+    curl -s -o /dev/null http://127.0.0.1
+    echo "Sent request at $(date)"
+    sleep 1
+done &
+
+CURL_PID=$!
+
+echo "--- Applying the updated deployment to trigger a rolling update ---"
+kubectl apply -f blue_deployment.yaml
+
+echo ""
+echo "--- Monitoring the rolling update status (this will take a minute) ---"
+kubectl rollout status deployment/django-app-deployment-blue
+
+echo ""
+echo "--- Rolling update complete! Stopping the downtime test. ---"
+kill $CURL_PID
+
+echo ""
+echo "--- Verifying the new pods are running ---"
+kubectl get pods -l app=django-app,version=blue
+
+echo ""
+echo "--- Update Finished ---"

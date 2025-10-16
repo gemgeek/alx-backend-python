@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: django-messaging-app
-          image: gemgeek/django-messaging-app:latest
+          image: gemgeek/django-messaging-app:v2
           ports:
             - containerPort: 8000
