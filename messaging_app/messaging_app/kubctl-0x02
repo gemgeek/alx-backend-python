@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# A script to demonstrate a blue-green deployment strategy.
+
+echo "--- Deploying the BLUE version and the service ---"
+kubectl apply -f blue_deployment.yaml
+kubectl apply -f kubeservice.yaml
+
+echo ""
+echo "--- Waiting for BLUE deployment to be ready (20 seconds) ---"
+sleep 20
+kubectl get pods -l app=django-app,version=blue
+
+echo ""
+echo "--- Deploying the GREEN version (the new release) ---"
+kubectl apply -f green_deployment.yaml
+
+echo ""
+echo "--- Waiting for GREEN deployment to be ready (20 seconds) ---"
+sleep 20
+kubectl get pods -l app=django-app,version=green
+
+echo ""
+echo "--- Checking logs of the new GREEN version for errors ---"
+# Get the name of one of the green pods to check its logs.
+GREEN_POD_NAME=$(kubectl get pods -l app=django-app,version=green -o jsonpath='{.items[0].metadata.name}')
+if [ -n "$GREEN_POD_NAME" ]; then
+    echo "Logs for pod: $GREEN_POD_NAME"
+    kubectl logs "$GREEN_POD_NAME"
+else
+    echo "Could not find a GREEN pod to check logs."
+fi
+
+echo ""
+echo "--- Blue-Green setup is complete! ---"
+echo "Currently, traffic is still directed to the BLUE version."
+echo "To switch traffic to GREEN, manually edit 'kubeservice.yaml' to select 'version: green' and run 'kubectl apply -f kubeservice.yaml'."
