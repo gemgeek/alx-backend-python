@@ -2,15 +2,15 @@ pipeline {
     agent any
 
     tools {
-        python 'Python-3.10'
+        pythonInstallation 'Python-3.10' 
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: 'github-credentials', 
-                    url: 'https://github.com/gemgeek/alx-backend-python.git', 
-                    branch: 'main' 
+                git credentialsId: 'github-credentials',
+                    url: 'https://github.com/gemgeek/alx-backend-python.git',
+                    branch: 'main'
             }
         }
 
@@ -28,14 +28,13 @@ pipeline {
                     sh 'python3 -m pytest --junitxml=test-reports/results.xml'
                 }
             }
-        }
 
-        stage('Publish Test Report') {
             post {
                 always {
                     junit 'messaging_app/test-reports/*.xml'
                 }
             }
         }
+
     }
 }
