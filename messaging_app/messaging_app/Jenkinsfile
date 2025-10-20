@@ -2,39 +2,33 @@ pipeline {
     agent any
 
     tools {
-        pythonInstallation 'Python-3.10' 
+        'jenkins.plugins.shiningpanda.tools.PythonInstallation' 'Python-3.10'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: 'github-credentials',
-                    url: 'https://github.com/gemgeek/alx-backend-python.git',
-                    branch: 'main'
+                git branch: 'main',
+                    credentialsId: 'github-credentials',
+                    url: 'https://github.com/gemgeek/alx-backend-python.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                dir('messaging_app') {
-                    sh 'python3 -m pip install -r requirements.txt'
-                }
+                sh 'pip3 install -r messaging_app/requirements.txt'
             }
         }
 
         stage('Run Tests') {
             steps {
-                dir('messaging_app') {
-                    sh 'python3 -m pytest --junitxml=test-reports/results.xml'
-                }
+                sh 'python3 -m pytest --junitxml=messaging_app/test-reports/results.xml messaging_app/'
             }
-
             post {
                 always {
                     junit 'messaging_app/test-reports/*.xml'
                 }
             }
         }
-
     }
 }
