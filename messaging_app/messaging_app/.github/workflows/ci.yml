@@ -9,13 +9,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     services:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: yourpassword  
-          MYSQL_DATABASE: test_db          
+          MYSQL_ROOT_PASSWORD: yourpassword
+          MYSQL_DATABASE: test_db
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=5
@@ -32,17 +31,31 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        # We need to specify the path to the requirements file
+        # Install the new tools for linting and coverage
+        pip install flake8 pytest-cov
         pip install -r messaging_app/requirements.txt
 
-    - name: Run Tests
+    - name: Lint with flake8
+      run: |
+        # Run flake8 on your app directory. It will automatically fail the
+        # build if it finds any style errors.
+        flake8 messaging_app/ --count --show-source --statistics
+
+    - name: Run Tests and Generate Coverage
       env:
         DB_NAME: test_db
         DB_USER: root
         DB_PASSWORD: yourpassword
-        DB_HOST: 127.0.0.1 
+        DB_HOST: 127.0.0.1
         DB_PORT: 3306
       run: |
-        # Change into the app directory before running tests
         cd messaging_app
-        pytest
+        # Run pytest, but now with the --cov flag to generate a coverage report
+        # The report will be saved as a file named "coverage.xml"
+        pytest --cov=./ --cov-report=xml
+
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: messaging_app/coverage.xml
